@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shopping_app/cart_provider.dart';
 
 class ProductDetailsPage extends StatefulWidget {
   final Map<String, Object> product;
@@ -10,7 +12,29 @@ class ProductDetailsPage extends StatefulWidget {
 }
 
 class _ProductDetailsPageState extends State<ProductDetailsPage> {
-  int selectedSize = 0;
+  int? selectedSizeIndex;
+  int? selectedSize;
+  void onTap() {
+    if (selectedSize != null) {
+      Provider.of<CartProvider>(context, listen: false).addProduct({
+        "id": widget.product["id"],
+        "title": widget.product["title"],
+        "price": widget.product["price"],
+        "size": selectedSize,
+        "company": widget.product["company"],
+        "imageUrl": widget.product["imageUrl"],
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Product added successfully"),
+        backgroundColor: Colors.green,
+      ));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Please select a Size"),
+      ));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,11 +87,12 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                             child: GestureDetector(
                               onTap: () {
                                 setState(() {
-                                  selectedSize = index;
+                                  selectedSizeIndex = index;
+                                  selectedSize = size;
                                 });
                               },
                               child: Chip(
-                                backgroundColor: selectedSize == index
+                                backgroundColor: selectedSizeIndex == index
                                     ? Theme.of(context).colorScheme.primary
                                     : Colors.transparent,
                                 label: Text(size.toString()),
@@ -84,7 +109,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                               Theme.of(context).colorScheme.primary,
                           minimumSize: const Size(double.infinity, 50),
                         ),
-                        onPressed: () {},
+                        onPressed: onTap,
                         child: const Text(
                           "Add to Cart",
                           style: TextStyle(
